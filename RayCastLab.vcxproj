@@ -91,12 +91,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="MyShapes.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shapes.cpp" />
     <ClCompile Include="ToScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MyShapes.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ToScreen.h" />

@@ -12,6 +12,8 @@
 #include "Shapes.h"
 #include <assert.h> 
 
+#include "MyShapes.h"
+
 #pragma comment(lib, "shapes.lib")
 
 extern ToScreen* g_ToScreen;
@@ -28,15 +30,15 @@ void buildScene()
 	if (shapes.size() == 0)
 	{
 		// a plane facing the camera, passing through point (0,0,1000)
-		shapes.push_back(dynamic_cast<Shape*>(new MPlane(Vec(0, 0, -1), -1000, Color(0, 30, 30))));
+		shapes.push_back(dynamic_cast<Shape*>(new Plane(Vec(0, 0, -1), -1000, Color(20, 30, 0))));
 
 		// a sphere at (400,400,300), with radius 200
-		shapes.push_back(dynamic_cast<Shape*>(new MSphere(Vec(400, 400, 300), 200, Color(100, 100, 0))));
+		//shapes.push_back(dynamic_cast<Shape*>(new MSphere(Vec(400, 400, 300), 200, Color(100, 100, 0))));
 
 		// two triangles 
-		shapes.push_back(dynamic_cast<Shape*>(new MTriangle({ 350, 100, 200 }, { 300,100,200 }, { 400,700, 30 }, { 200,0,0 })));
-		shapes.push_back(dynamic_cast<Shape*>(new MTriangle({ 100,300,0 }, { 150,300,0 }, { 100,100,0 }, { 0,0,255 })));
-		shapes.push_back(dynamic_cast<Shape*>(new MTriangle({ 150,300,0 }, { 150,100,0 }, { 100,100,0 }, { 0,255,255 })));
+		//shapes.push_back(dynamic_cast<Shape*>(new MTriangle({ 350, 100, 200 }, { 300,100,200 }, { 400,700, 30 }, { 200,0,0 })));
+		//shapes.push_back(dynamic_cast<Shape*>(new MTriangle({ 100,300,0 }, { 150,300,0 }, { 100,100,0 }, { 0,0,255 })));
+		//shapes.push_back(dynamic_cast<Shape*>(new MTriangle({ 150,300,0 }, { 150,100,0 }, { 100,100,0 }, { 0,255,255 })));
 
 
 		float size = 20;
@@ -46,7 +48,7 @@ void buildScene()
 			Vec off { size*2 * i, 700.0, 0.0 };
 			p0.x = cosf(TORAD(i * (90/20.0f))) * size; p0.z = -sinf(TORAD(i * (90/20.0f))) * size;
 			p1.x = -p0.x; p1.z = -p0.z;
-			shapes.push_back(dynamic_cast<Shape*>(new MTriangle(p0 + off, p1 + off, p2 + off, { 255,255,0 })));
+			//shapes.push_back(dynamic_cast<Shape*>(new MTriangle(p0 + off, p1 + off, p2 + off, { 255,255,0 })));
 		}
 		
 		// one OBB touching the sphere on the side
@@ -58,7 +60,7 @@ void buildScene()
 		// rotate around Z the basis
 		b1.x = cosf(angle); b1.y = -sinf(angle);
 		b2.x = sinf(angle); b2.y = cosf(angle);
-		shapes.push_back(dynamic_cast<Shape*>(new MOBB(Vec(g_ToScreen->mScreenWidth/2, g_ToScreen->mScreenHeight/2, 100), b1, b2, b3, 50, 50, 50, { 0,255,0 })));
+		//shapes.push_back(dynamic_cast<Shape*>(new MOBB(Vec(g_ToScreen->mScreenWidth/2, g_ToScreen->mScreenHeight/2, 100), b1, b2, b3, 50, 50, 50, { 0,255,0 })));
 		// further rotate around X the basis
 		float tempY = b1.y * cosf(angle) + b1.z * sinf(angle);
 		b1.z = b1.y * -sinf(angle) + b1.z * cosf(angle);
@@ -66,7 +68,7 @@ void buildScene()
 		tempY = b2.y * cosf(angle) + b2.z * sinf(angle);
 		b2.z = b2.y * -sinf(angle) + b2.z * cosf(angle);
 		b2.y = tempY;
-		shapes.push_back(dynamic_cast<Shape*>(new MOBB(Vec(200,600,400), b1,b2,b3, 100, 100, 100, {255,0,0})));
+		//shapes.push_back(dynamic_cast<Shape*>(new MOBB(Vec(200,600,400), b1,b2,b3, 100, 100, 100, {255,0,0})));
 	}
 }
 
