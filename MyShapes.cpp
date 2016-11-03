@@ -36,7 +36,7 @@ void MyPlane::test(Ray & r, HitData & hit)
 		t = -(n.Dot(r.o) + k) / n.Dot(r.d)
 		*/
 
-		float t = -(n.Dot(r.o) + k) / n.Dot(r.d);
+		float t = -(n.Dot(r.o) + k) / dot;
 
 		hit.t = t;
 		hit.color = c;
