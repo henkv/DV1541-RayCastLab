@@ -12,6 +12,17 @@ struct Vec
 	Vec() {};
 	Vec(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {};
 	float Dot(const Vec& v2) { return (x * v2.x) + (y * v2.y) + (z * v2.z); }
+	Vec Cross(const Vec& v2)
+	{
+		/*
+			i   j   k
+		    x   y   z
+			a   b   c
+
+			Vec(y * c - z * b, z * a - x * c, x * b - y * a);
+		*/
+		return Vec(y * v2.z - z * v2.y, z * v2.x - x * v2.z, x * v2.y - y * v2.x);
+	};
 
 	Vec operator-(const Vec& v)
 	{
@@ -52,6 +63,11 @@ struct Ray
 {
 	Vec	o;
 	Vec	d;
+
+	Vec operator()(float t)
+	{
+		return o + d * t;
+	}
 
 	Ray(Vec origin, Vec direction) : o(origin), d(direction) { };
 };

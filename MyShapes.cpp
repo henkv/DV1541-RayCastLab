@@ -16,11 +16,7 @@ void MyPlane::test(Ray & r, HitData & hit)
 {
 	float dot = n.Dot(r.d);
 
-	if (dot == 0)
-	{
-		hit.t = -1.f;
-	}
-	else
+	if (dot != 0)
 	{
 		/*
 			 | x = r.o.x + r.d.x * t
@@ -38,10 +34,13 @@ void MyPlane::test(Ray & r, HitData & hit)
 
 		float t = -(n.Dot(r.o) + k) / dot;
 
-		hit.t = t;
-		hit.color = c;
-		hit.lastNormal = n;
-		hit.lastShape = this;
+		if (t < hit.t || hit.t < 0)
+		{
+			hit.t = t;
+			hit.color = c;
+			hit.lastNormal = n;
+			hit.lastShape = this;
+		}
 	}
 }
 
@@ -61,15 +60,93 @@ MySphere::MySphere(Vec center, float radius, Color color)
 void MySphere::test(Ray & r, HitData & hit)
 {
 	/*
-		(r.o + r.d * t).Length2 = r2;
-		(ro.x^2
-		
+		f(x) = ||x - p|| - r = 0
+		f(ray) = ||o + td - p|| - r = 0
+		f(ray) = (o + td - p) * (o + td - p) = r2
+		f(ray) = (o + td - p) * (o + td - p) = r2
+		f(ray) = (td + (o - p)) * (td + (o - p)) = r2
+		f(ray) = td * td + td * (o - p) + td * (o - p) + (o - p) * (o - p) = r2
+		f(ray) = t2 + 2t(d * (o - p)) + (o - p) * (o - p) - r2 = 0
+		a = (d * (o - p))
+		b = (o - p) * (o - p) - r2
+
+		t2 + 2ta + b = 0
+		t = -a +- sqr(a2 - b)
 	*/
+	Vec po = r.o - p;
+	float a = r.d.Dot(po);
+	float b = po.Dot(po) - r2;
+	float c = a * a - b;
+
+	if (c > 0)
+	{
+		float sqrc = sqrt(c);
+		float t1 = -a + sqrc;
+		float t2 = -a - sqrc;
+
+		if (t1 > t2) std::swap(t1, t2);
+
+		if (t1 > 0 && (t1 < hit.t || hit.t < 0))
+		{
+			hit.t = t1;
+			hit.color = this->c;
+			hit.lastNormal = normal(r.o);
+			hit.lastShape = this;
+		}
+		else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
+		{
+			hit.t = t2;
+			hit.color = this->c;
+			hit.lastNormal = normal(r.o);
+			hit.lastShape = this;
+		}
+	}
+	else if (c == 0)
+	{
+		float t = -a + sqrt(c);
+
+		if (t > 0 && (t < hit.t || hit.t < 0))
+		{
+			hit.t = t;
+			hit.color = this->c;
+			hit.lastNormal = normal(r.o);
+			hit.lastShape = this;
+		}
+	}
 }
 
 Vec MySphere::normal(Vec & o)
 {
 	Vec n = o - p;
 	n.Normalize();
+	return n;
+}
+
+MyTriangle::MyTriangle(Vec p1, Vec p2, Vec p3, Color color)
+{
+	this->p1 = p1;
+	this->p2 = p2;
+	this->p3 = p3;
+	this->n = (p2 - p1).Cross(p3 - p1);
+	this->d = -n.Dot(p1);
+	this->c = color;
+}
+
+void MyTriangle::test(Ray & ray, HitData & hit)
+{
+	float ndotd = n.Dot(ray.d);
+	if (ndotd != 0)
+	{
+		float t = -(n.Dot(ray.o) + d) / ndotd;	
+
+		if (t > 0)
+		{
+			Vec p = ray(t);
+		}
+	}
+}
+
+Vec MyTriangle::normal(Vec & point)
+{
 	return n;
 }
