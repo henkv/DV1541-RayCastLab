@@ -86,6 +86,7 @@ void MySphere::test(Ray & r, HitData & hit)
 
 		if (t1 > t2) std::swap(t1, t2);
 
+
 		if (t1 > 0 && (t1 < hit.t || hit.t < 0))
 		{
 			hit.t = t1;
