@@ -59,6 +59,8 @@ struct Vec
 	}
 };
 
+
+
 struct Ray
 {
 	Vec	o;

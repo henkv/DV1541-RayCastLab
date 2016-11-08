@@ -219,8 +219,8 @@ void OBB::test(Ray & ray, HitData & hit)
 		wT[1] = -(nW1.Dot(ray.o) + dW1) / nW1.Dot(ray.d);
 	}
 
-	minT = std::max(uT[0], vT[0], wT[0]);
-	maxT = std::min(uT[1], vT[1], wT[1]);
+	minT = std::max({uT[0], vT[0], wT[0]});
+	maxT = std::min({uT[1], vT[1], wT[1]});
 
 	if (minT <= maxT)
 	{
