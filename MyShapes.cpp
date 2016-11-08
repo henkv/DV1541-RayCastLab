@@ -123,13 +123,14 @@ Vec MySphere::normal(Vec & o)
 	return n;
 }
 
-MyTriangle::MyTriangle(Vec p1, Vec p2, Vec p3, Color color)
+MyTriangle::MyTriangle(Vec p0, Vec p1, Vec p2, Color color)
 {
+	this->p0 = p0;
 	this->p1 = p1;
 	this->p2 = p2;
-	this->p3 = p3;
-	this->n = (p2 - p1).Cross(p3 - p1);
-	this->d = -n.Dot(p1);
+	this->e0 = p1 - p0;
+	this->e1 = p2 - p0;
+	this->n = e0.Cross(e1);
 	this->c = color;
 }
 
@@ -138,11 +139,22 @@ void MyTriangle::test(Ray & ray, HitData & hit)
 	float ndotd = n.Dot(ray.d);
 	if (ndotd != 0)
 	{
-		float t = -(n.Dot(ray.o) + d) / ndotd;	
+		Mat M = { ray.d * -1, e0, e1 };
+		Vec p = ray.o - p0;
+		Vec tuv = M.inv() * p;
+		float t = tuv.x;
+		float u = tuv.y;
+		float v = tuv.z;
 
-		if (t > 0)
+		if (t > 0 && u >= 0 && v >= 0 && (u + v) <= 1)
 		{
-			Vec p = ray(t);
+			if (t < hit.t || hit.t < 0)
+			{
+				hit.t = t;
+				hit.color = this->c;
+				hit.lastNormal = n;
+				hit.lastShape = this;
+			}
 		}
 	}
 }

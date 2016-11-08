@@ -38,11 +38,9 @@ public:
 class MyTriangle : public Shape
 {
 private:
-	Vec p1, p2, p3, n;
-	float d;
+	Vec p0, p1, p2, e0, e1, n;
 public:
-	MyTriangle(Vec p1, Vec p2, Vec p3, Color color);
-
+	MyTriangle(Vec p0, Vec p2, Vec p3, Color color);
 
 	// Inherited via Shape
 	virtual void test(Ray & ray, HitData & hit) override;
