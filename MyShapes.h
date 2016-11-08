@@ -30,9 +30,9 @@ struct Mat
 		d8 = m[0][0] * m[1][2] - m[0][2] * m[1][0];
 		d9 = m[0][0] * m[1][1] - m[0][1] * m[1][0];
 
-		o.m[0][0] = d1; o.m[0][1] = -d4; o.m[0][2] = d7;
-		o.m[1][0] = -d2; o.m[1][1] = d5; o.m[1][2] = -d8;
-		o.m[2][0] = d3; o.m[2][1] = -d6; o.m[2][2] = d9;
+		o.m[0][0] =  d1; o.m[0][1] = -d4; o.m[0][2] =  d7;
+		o.m[1][0] = -d2; o.m[1][1] =  d5; o.m[1][2] = -d8;
+		o.m[2][0] =  d3; o.m[2][1] = -d6; o.m[2][2] =  d9;
 
 		float det = m[0][0] * d1 - m[0][1] * d2 + m[0][2] * d3;
 
@@ -65,6 +65,7 @@ struct Mat
 		return o;
 	}
 };
+
 
 class Plane : public Shape
 {
@@ -115,12 +116,9 @@ public:
 class OBB : public Shape
 {
 private:
-	Vec mid;
-	float halfU, halfV, halfW;
-
-	Vec   nU0, nU1, nV0, nV1, nW0, nW1;
-	Vec   pU0, pU1, pV0, pV1, pW0, pW1;
-	float dU0, dU1, dV0, dV1, dW0, dW1;
+	Vec mid, uN, vN, wN;
+	float uD, vD, wD;
+	float uH, vH, wH;
 
 public:
 	OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color);

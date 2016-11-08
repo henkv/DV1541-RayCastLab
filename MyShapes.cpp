@@ -21,10 +21,10 @@ void Plane::test(Ray & r, HitData & hit)
 		/*
 			 | x = r.o.x + r.d.x * t
 		ray: | y = r.o.y + r.d.y * t
-		     | z = r.o.z + r.d.z * t
+			 | z = r.o.z + r.d.z * t
 
 		plane: n.x + n.y + n.z + k = 0
-		 
+
 		n.x * (r.o.x + r.d.x * t) + n.y * (r.o.y + r.d.y * t) + n.z * (r.o.z + r.d.z * t) + k = 0
 		t * (n.x * r.d.x + n.y * r.d.y + n.z * r.d.z) + (n.x * r.o.x +  n.y * r.o.y + n.z * r.o.z) + k = 0
 		t * n.Dot(r.d) + n.Dot(r.o) + k = 0
@@ -34,7 +34,7 @@ void Plane::test(Ray & r, HitData & hit)
 
 		float t = -(n.Dot(r.o) + k) / dot;
 
-		if (t < hit.t || hit.t < 0)
+		if (t > 0 && (hit.t > t || hit.t < 0))
 		{
 			hit.t = t;
 			hit.color = c;
@@ -167,30 +167,22 @@ Vec Triangle::normal(Vec & point)
 OBB::OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color)
 {
 	this->mid = midPoint;
-	this->halfU = halfU;
-	this->halfV = halfV;
-	this->halfW = halfW;
 
-	this->nU0 = normU;
-	this->pU0 = mid + nU0 * halfU;
-	this->dU0 = nU0.Dot(pU0);
-	this->nU1 = normU * -1;
-	this->pU1 = mid + nU1 * halfU;
-	this->dU1 = nU1.Dot(pU0);
+	this->uN = normU;
+	this->vN = normV;
+	this->wN = normW;
 
-	this->nV0 = normV;
-	this->pV0 = mid + nV0 * halfV;
-	this->dV0 = nV0.Dot(pV0);
-	this->nV1 = normV * -1;
-	this->pV1 = mid + nV1 * halfV;
-	this->dV1 = nV1.Dot(pV1);
+	/*
+		n * (x - p) = 0
 
-	this->nW0 = normW;
-	this->pW0 = mid + nW0 * halfW;
-	this->dW0 = nW0.Dot(pW0);
-	this->nW1 = normW * -1;
-	this->pW1 = mid + nW1 * halfW;
-	this->dW1 = nW1.Dot(pW1);
+
+		
+	*/
+
+	this->uH = halfU;
+	this->vH = halfV;
+	this->wH = halfW;
+
 
 	this->c = color;
 }
@@ -201,26 +193,8 @@ void OBB::test(Ray & ray, HitData & hit)
 	float vT[2] = { -INFINITY, INFINITY };
 	float wT[2] = { -INFINITY, INFINITY };
 	float minT, maxT;
+	float f1;
 
-	float nU0dotD = nU0.Dot(ray.d);
-	float nV0dotD = nV0.Dot(ray.d);
-	float nW0dotD = nW0.Dot(ray.d);
-	
-	if (nU0dotD != 0) {
-		uT[0] = -(nU0.Dot(ray.o) + dU0) / nU0dotD;
-		uT[1] = -(nU1.Dot(ray.o) + dU1) / nU1.Dot(ray.d);
-	}
-	if (nV0dotD != 0) {
-		vT[0] = -(nV0.Dot(ray.o) + dV0) / nV0dotD;
-		vT[1] = -(nV1.Dot(ray.o) + dV1) / nV1.Dot(ray.d);
-	}
-	if (nW0dotD != 0) {
-		wT[0] = -(nW0.Dot(ray.o) + dW0) / nW0dotD;
-		wT[1] = -(nW1.Dot(ray.o) + dW1) / nW1.Dot(ray.d);
-	}
-
-	minT = std::max({uT[0], vT[0], wT[0]});
-	maxT = std::min({uT[1], vT[1], wT[1]});
 
 	if (minT <= maxT)
 	{
@@ -229,12 +203,20 @@ void OBB::test(Ray & ray, HitData & hit)
 			hit.t = minT;
 			hit.color = c;
 			hit.lastShape = this;
-			hit.lastNormal = normal(ray.o);
+			hit.lastNormal = normal(ray(minT));
 		}
 	}
 }
 
 Vec OBB::normal(Vec & point)
 {
-	return Vec();
+	Vec op = point - mid;
+	op.Normalize();
+
+	float big;
+	Vec norm;
+
+
+
+	return norm;
 }

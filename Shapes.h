@@ -16,7 +16,7 @@ struct Vec
 	{
 		/*
 			i   j   k
-		    x   y   z
+			x   y   z
 			a   b   c
 
 			Vec(y * c - z * b, z * a - x * c, x * b - y * a);
@@ -84,16 +84,16 @@ struct Color
 	Color(BYTE red, BYTE green, BYTE blue) : r(red), g(green), b(blue) {};
 	const Color& operator+(const Color& plus) {
 		unsigned int rr, gg, bb;
-		rr = plus.r + r; 
-		if (rr > 255) 
+		rr = plus.r + r;
+		if (rr > 255)
 			rr = 255;
-		gg = plus.g + g; 
-		if (gg > 255) 
-			gg= 255;
-		bb = plus.b + b; 
-		if (bb > 255) 
+		gg = plus.g + g;
+		if (gg > 255)
+			gg = 255;
+		bb = plus.b + b;
+		if (bb > 255)
 			bb = 255;
-		return Color(rr,gg,bb);
+		return Color(rr, gg, bb);
 	}
 };
 
@@ -150,10 +150,10 @@ class MTriangle : public Shape
 {
 	Vec p1, p2, p3, nor;
 	Vec edge0, edge1;
-	public:
-		void test(Ray& ray, HitData& hit);
-		Vec normal(Vec &point) { return nor; }
-		MTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color);
+public:
+	void test(Ray& ray, HitData& hit);
+	Vec normal(Vec &point) { return nor; }
+	MTriangle(Vec _p1, Vec _p2, Vec _p3, Color _color);
 
 };
 
@@ -165,9 +165,9 @@ public:
 	Vec Bv;
 	Vec Bw;
 
-	Vec Pu,Puo;
-	Vec Pv,Pvo;
-	Vec Pw,Pwo;
+	Vec Pu, Puo;
+	Vec Pv, Pvo;
+	Vec Pw, Pwo;
 
 	float halfBu;
 	float halfBv;
