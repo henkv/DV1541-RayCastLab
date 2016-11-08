@@ -60,7 +60,7 @@ void buildScene()
 		// rotate around Z the basis
 		b1.x = cosf(angle); b1.y = -sinf(angle);
 		b2.x = sinf(angle); b2.y = cosf(angle);
-		//shapes.push_back(dynamic_cast<Shape*>(new MOBB(Vec(g_ToScreen->mScreenWidth/2, g_ToScreen->mScreenHeight/2, 100), b1, b2, b3, 50, 50, 50, { 0,255,0 })));
+		shapes.push_back(dynamic_cast<Shape*>(new OBB(Vec(g_ToScreen->mScreenWidth/2, g_ToScreen->mScreenHeight/2, 100), b1, b2, b3, 50, 50, 50, { 0,255,0 })));
 		// further rotate around X the basis
 		float tempY = b1.y * cosf(angle) + b1.z * sinf(angle);
 		b1.z = b1.y * -sinf(angle) + b1.z * cosf(angle);
@@ -68,7 +68,7 @@ void buildScene()
 		tempY = b2.y * cosf(angle) + b2.z * sinf(angle);
 		b2.z = b2.y * -sinf(angle) + b2.z * cosf(angle);
 		b2.y = tempY;
-		//shapes.push_back(dynamic_cast<Shape*>(new MOBB(Vec(200,600,400), b1,b2,b3, 100, 100, 100, {255,0,0})));
+		//shapes.push_back(dynamic_cast<Shape*>(new OBB(Vec(200,600,400), b1,b2,b3, 100, 100, 100, {255,0,0})));
 	}
 }
 

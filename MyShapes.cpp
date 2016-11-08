@@ -1,6 +1,6 @@
 #include "MyShapes.h"
 
-MyPlane::MyPlane(Vec normal, float distance, Color color)
+Plane::Plane(Vec normal, float distance, Color color)
 {
 	this->n/*ormal*/ = normal;
 	this->p/*oint*/ = normal * distance;
@@ -12,7 +12,7 @@ MyPlane::MyPlane(Vec normal, float distance, Color color)
 	// n.x + n.y + n.z + k = 0;
 }
 
-void MyPlane::test(Ray & r, HitData & hit)
+void Plane::test(Ray & r, HitData & hit)
 {
 	float dot = n.Dot(r.d);
 
@@ -44,12 +44,12 @@ void MyPlane::test(Ray & r, HitData & hit)
 	}
 }
 
-Vec MyPlane::normal(Vec & point)
+Vec Plane::normal(Vec & point)
 {
 	return n;
 }
 
-MySphere::MySphere(Vec center, float radius, Color color)
+Sphere::Sphere(Vec center, float radius, Color color)
 {
 	this->c = color;
 	this->p = center;
@@ -57,7 +57,7 @@ MySphere::MySphere(Vec center, float radius, Color color)
 	this->r2 = radius * radius;
 }
 
-void MySphere::test(Ray & r, HitData & hit)
+void Sphere::test(Ray & r, HitData & hit)
 {
 	/*
 		f(x) = ||x - p|| - r = 0
@@ -116,14 +116,14 @@ void MySphere::test(Ray & r, HitData & hit)
 	}
 }
 
-Vec MySphere::normal(Vec & o)
+Vec Sphere::normal(Vec & o)
 {
 	Vec n = o - p;
 	n.Normalize();
 	return n;
 }
 
-MyTriangle::MyTriangle(Vec p0, Vec p1, Vec p2, Color color)
+Triangle::Triangle(Vec p0, Vec p1, Vec p2, Color color)
 {
 	this->p0 = p0;
 	this->p1 = p1;
@@ -134,7 +134,7 @@ MyTriangle::MyTriangle(Vec p0, Vec p1, Vec p2, Color color)
 	this->c = color;
 }
 
-void MyTriangle::test(Ray & ray, HitData & hit)
+void Triangle::test(Ray & ray, HitData & hit)
 {
 	float ndotd = n.Dot(ray.d);
 	if (ndotd != 0)
@@ -159,7 +159,82 @@ void MyTriangle::test(Ray & ray, HitData & hit)
 	}
 }
 
-Vec MyTriangle::normal(Vec & point)
+Vec Triangle::normal(Vec & point)
 {
 	return n;
+}
+
+OBB::OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color)
+{
+	this->mid = midPoint;
+	this->halfU = halfU;
+	this->halfV = halfV;
+	this->halfW = halfW;
+
+	this->nU0 = normU;
+	this->pU0 = mid + nU0 * halfU;
+	this->dU0 = nU0.Dot(pU0);
+	this->nU1 = normU * -1;
+	this->pU1 = mid + nU1 * halfU;
+	this->dU1 = nU1.Dot(pU0);
+
+	this->nV0 = normV;
+	this->pV0 = mid + nV0 * halfV;
+	this->dV0 = nV0.Dot(pV0);
+	this->nV1 = normV * -1;
+	this->pV1 = mid + nV1 * halfV;
+	this->dV1 = nV1.Dot(pV1);
+
+	this->nW0 = normW;
+	this->pW0 = mid + nW0 * halfW;
+	this->dW0 = nW0.Dot(pW0);
+	this->nW1 = normW * -1;
+	this->pW1 = mid + nW1 * halfW;
+	this->dW1 = nW1.Dot(pW1);
+
+	this->c = color;
+}
+
+void OBB::test(Ray & ray, HitData & hit)
+{
+	float uT[2] = { -INFINITY, INFINITY };
+	float vT[2] = { -INFINITY, INFINITY };
+	float wT[2] = { -INFINITY, INFINITY };
+	float minT, maxT;
+
+	float nU0dotD = nU0.Dot(ray.d);
+	float nV0dotD = nV0.Dot(ray.d);
+	float nW0dotD = nW0.Dot(ray.d);
+	
+	if (nU0dotD != 0) {
+		uT[0] = -(nU0.Dot(ray.o) + dU0) / nU0dotD;
+		uT[1] = -(nU1.Dot(ray.o) + dU1) / nU1.Dot(ray.d);
+	}
+	if (nV0dotD != 0) {
+		vT[0] = -(nV0.Dot(ray.o) + dV0) / nV0dotD;
+		vT[1] = -(nV1.Dot(ray.o) + dV1) / nV1.Dot(ray.d);
+	}
+	if (nW0dotD != 0) {
+		wT[0] = -(nW0.Dot(ray.o) + dW0) / nW0dotD;
+		wT[1] = -(nW1.Dot(ray.o) + dW1) / nW1.Dot(ray.d);
+	}
+
+	minT = std::max(uT[0], vT[0], wT[0]);
+	maxT = std::min(uT[1], vT[1], wT[1]);
+
+	if (minT <= maxT)
+	{
+		if (minT > 0 && (minT < hit.t || hit.t < 0))
+		{
+			hit.t = minT;
+			hit.color = c;
+			hit.lastShape = this;
+			hit.lastNormal = normal(ray.o);
+		}
+	}
+}
+
+Vec OBB::normal(Vec & point)
+{
+	return Vec();
 }
