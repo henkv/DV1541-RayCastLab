@@ -167,57 +167,117 @@ Vec Triangle::normal(Vec & point)
 
 OBB::OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color)
 {
-	this->mid = midPoint;
+	this->m = midPoint;
 
 	this->uN = normU;
 	this->vN = normV;
 	this->wN = normW;
 
-	/*
-	n * (p - x) = 0
-	n * p  =  n * x
-	a = n * p
-	a  =  n * o + t(n * d)
-	a - n * o = t(n * d)
-
-	t = (a - n * o) / (n * d)
-
-
-		
-	*/
-
 	this->uH = halfU;
 	this->vH = halfV;
 	this->wH = halfW;
 
+	this->uO = uN * uH;
+	this->vO = vN * vH;
+	this->wO = wN * wH;
 
 	this->c = color;
 }
 
-void OBB::test(Ray & ray, HitData & hit)
+void OBB::test(Ray & r, HitData & hit)
 {
-	float uT[2] = { -INFINITY, INFINITY };
-	float vT[2] = { -INFINITY, INFINITY };
-	float wT[2] = { -INFINITY, INFINITY };
-	float minT, maxT;
-	float f1;
+	float tMin = -INFINITY;
+	float tMax = INFINITY;
+	float t1, t2, k1, k2;
+	Vec p1, p2;
 
+	float uNDd = uN.Dot(r.d);
+	if (uNDd != 0)
+	{
+		float uNDo = uN.Dot(r.o);
+		t1 = (uN.Dot(m + uO) - uNDo) / uNDd;
+		t2 = (uN.Dot(m - uO) - uNDo) / uNDd;
+		if (t1 > t2) std::swap(t1, t2);
+		if (t1 > tMin) tMin = t1;
+		if (t2 < tMax) tMax = t2;
+		if (tMin > tMax) return;
+		if (tMax < 0) return;
+	}
+	else
+	{
+		p1 = m + uO;
+		p2 = m - uO;
+		k1 = -uN.Dot(p1);
+		k2 = -uN.Dot(p2);
+		k1 += uN.Dot(p1 + r.d);
+		k2 += uN.Dot(p2 + r.d);
 
-	//if (minT <= maxT)
-	//{
-	//	if (minT > 0 && (minT < hit.t || hit.t < 0))
-	//	{
-	//		hit.t = minT;
-	//		hit.color = c;
-	//		hit.lastShape = this;
-	//		hit.lastNormal = normal(ray(minT));
-	//	}
-	//}
+		if (k1 != 0 && k2 != 0) return;
+	}
+
+	float vNDd = vN.Dot(r.d);
+	if (vNDd != 0)
+	{
+		float vNDo = vN.Dot(r.o);
+		t1 = (vN.Dot(m + vO) - vNDo) / vNDd;
+		t2 = (vN.Dot(m - vO) - vNDo) / vNDd;
+		if (t1 > t2) std::swap(t1, t2);
+		if (t1 > tMin) tMin = t1;
+		if (t2 < tMax) tMax = t2;
+		if (tMin > tMax) return;
+		if (tMax < 0) return;
+	}
+	else
+	{
+		p1 = m + vO;
+		p2 = m - vO;
+		k1 = -vN.Dot(p1);
+		k2 = -vN.Dot(p2);
+		k1 += vN.Dot(p1 + r.d);
+		k2 += vN.Dot(p2 + r.d);
+
+		if (k1 != 0 && k2 != 0) return;
+	}
+
+	float wNDd = wN.Dot(r.d);
+	if (wNDd != 0)
+	{
+		float wNDo = wN.Dot(r.o);
+		t1 = (wN.Dot(m + wO) - wNDo) / wNDd;
+		t2 = (wN.Dot(m - wO) - wNDo) / wNDd;
+		if (t1 > t2) std::swap(t1, t2);
+		if (t1 > tMin) tMin = t1;
+		if (t2 < tMax) tMax = t2;
+		if (tMin > tMax) return;
+		if (tMax < 0) return;
+	}
+	else
+	{
+		p1 = m + wO;
+		p2 = m - wO;
+		k1 = -wN.Dot(p1);
+		k2 = -wN.Dot(p2);
+		k1 += wN.Dot(p1 + r.d);
+		k2 += wN.Dot(p2 + r.d);
+
+		if (k1 != 0 && k2 != 0) return;
+	}
+
+	if (tMin <= tMax)
+	{
+		if (tMin > 0 && (hit.t > tMin || hit.t < 0))
+		{
+			hit.t = tMin;
+			hit.color = c;
+			hit.lastShape = this;
+			hit.lastNormal = Vec();
+		}
+	}	
 }
 
 Vec OBB::normal(Vec & point)
 {
-	Vec op = point - mid;
+	Vec op = point - m;
 	op.Normalize();
 
 	float big;

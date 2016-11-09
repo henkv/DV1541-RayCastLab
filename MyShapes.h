@@ -116,9 +116,10 @@ public:
 class OBB : public Shape
 {
 private:
-	Vec mid, uN, vN, wN;
-	float uD, vD, wD;
+	Vec m, uN, vN, wN;
+	Vec uO, vO, wO;
 	float uH, vH, wH;
+	float uK, vK, wK;
 
 public:
 	OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color);
