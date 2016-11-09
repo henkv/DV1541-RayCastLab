@@ -30,7 +30,7 @@ void buildScene()
 	if (shapes.size() == 0)
 	{
 		// a plane facing the camera, passing through point (0,0,1000)
-		shapes.push_back(dynamic_cast<Shape*>(new Plane(Vec(0, 0, -1), -1000, Color(50, 150, 50))));
+		shapes.push_back(dynamic_cast<Shape*>(new Plane(Vec(0, 0, -1), -1000, Color(0, 30, 30))));
 
 		// a sphere at (400,400,300), with radius 200
 		shapes.push_back(dynamic_cast<Shape*>(new Sphere(Vec(400, 400, 300), 200, Color(150, 25, 0))));

@@ -91,14 +91,14 @@ void Sphere::test(Ray & r, HitData & hit)
 		{
 			hit.t = t1;
 			hit.color = this->c;
-			hit.lastNormal = normal(r.o);
+			hit.lastNormal = normal(r(t1));
 			hit.lastShape = this;
 		}
 		else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
 		{
 			hit.t = t2;
 			hit.color = this->c;
-			hit.lastNormal = normal(r.o);
+			hit.lastNormal = normal(r(t2));
 			hit.lastShape = this;
 		}
 	}
@@ -131,6 +131,7 @@ Triangle::Triangle(Vec p0, Vec p1, Vec p2, Color color)
 	this->e0 = p1 - p0;
 	this->e1 = p2 - p0;
 	this->n = e0.Cross(e1);
+	n.Normalize();
 	this->c = color;
 }
 
@@ -173,7 +174,13 @@ OBB::OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV
 	this->wN = normW;
 
 	/*
-		n * (x - p) = 0
+	n * (p - x) = 0
+	n * p  =  n * x
+	a = n * p
+	a  =  n * o + t(n * d)
+	a - n * o = t(n * d)
+
+	t = (a - n * o) / (n * d)
 
 
 		
@@ -196,16 +203,16 @@ void OBB::test(Ray & ray, HitData & hit)
 	float f1;
 
 
-	if (minT <= maxT)
-	{
-		if (minT > 0 && (minT < hit.t || hit.t < 0))
-		{
-			hit.t = minT;
-			hit.color = c;
-			hit.lastShape = this;
-			hit.lastNormal = normal(ray(minT));
-		}
-	}
+	//if (minT <= maxT)
+	//{
+	//	if (minT > 0 && (minT < hit.t || hit.t < 0))
+	//	{
+	//		hit.t = minT;
+	//		hit.color = c;
+	//		hit.lastShape = this;
+	//		hit.lastNormal = normal(ray(minT));
+	//	}
+	//}
 }
 
 Vec OBB::normal(Vec & point)
