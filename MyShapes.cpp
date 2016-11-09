@@ -1,5 +1,6 @@
 #include "MyShapes.h"
 #define EPS 0.0001
+#define ZERO(f) (abs(f) < EPS)
 
 Plane::Plane(Vec normal, float distance, Color color)
 {
@@ -218,13 +219,18 @@ Vec OBB::normal(Vec & point)
 {
 	Vec n = { 0,0,0 };
 
-	for (int i = 0, ni; i < 6; i++)
+	for (int i = 0, i2; i < 3; i++)
 	{
-		ni = i / 2;
-		if (abs(normals[ni].Dot(point - centers[i])) < EPS)
+		i2 = i * 2;
+		if (ZERO(normals[i].Dot(point - centers[i2])))
 		{
-			n = normals[ni];
-			if (i % 2 == 1)	n = n * -1;
+			n = normals[i];
+			break;
+		}
+		else if (ZERO(normals[i].Dot(point - centers[i2 + 1])))
+		{
+			n = normals[i] * -1;
+			break;
 		}
 	}
 
