@@ -1,4 +1,5 @@
 #include "MyShapes.h"
+#define EPS 0.0000000001
 
 Plane::Plane(Vec normal, float distance, Color color)
 {
@@ -78,7 +79,7 @@ void Sphere::test(Ray & r, HitData & hit)
 	float b = po.Dot(po) - r2;
 	float c = a * a - b;
 
-	if (c > 0)
+	if (c >= 0)
 	{
 		float sqrc = sqrt(c);
 		float t1 = -a + sqrc;
@@ -94,25 +95,13 @@ void Sphere::test(Ray & r, HitData & hit)
 			hit.lastNormal = normal(r(t1));
 			hit.lastShape = this;
 		}
-		else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
+		/*else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
 		{
 			hit.t = t2;
 			hit.color = this->c;
 			hit.lastNormal = normal(r(t2));
 			hit.lastShape = this;
-		}
-	}
-	else if (c == 0)
-	{
-		float t = -a + sqrt(c);
-
-		if (t > 0 && (t < hit.t || hit.t < 0))
-		{
-			hit.t = t;
-			hit.color = this->c;
-			hit.lastNormal = normal(r.o);
-			hit.lastShape = this;
-		}
+		}*/
 	}
 }
 

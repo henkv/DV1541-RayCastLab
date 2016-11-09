@@ -1,14 +1,19 @@
 #include "Shapes.h"
 
-
 Color Shape::shade(Vec& light, const Vec& cam, Ray& ray, HitData& h)
 {
-	Color out;
-	Color globalLight = { 255, 255, 255 };
-	Color ambientLight = { 50, 50, 50 };
-	Vec p, l;
-	float diff, div = 1.f / 255.f;
-	float r, g, b;
+	Color	out,
+			globalLight = { 255, 255, 255 },
+			ambientLight = { 50, 50, 50 };
+
+	Vec		p,
+			l;
+
+	float	diff, 
+			div = 1.f / 255.f,
+			r, 
+			g, 
+			b;
 
 	l = light - ray(h.t);
 	l.Normalize();
