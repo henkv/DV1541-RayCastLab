@@ -116,14 +116,14 @@ public:
 class OBB : public Shape
 {
 private:
-	Vec m, uN, vN, wN;
-	Vec uO, vO, wO;
-	float uH, vH, wH;
-	float uK, vK, wK;
+	Vec m;
+	Vec normals[3];
+	Vec centers[6];
+	float halfWidths[3];
 
 public:
 	OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color);
-	//OBB(Vec midPoint, float halfU, float halfV, float halfW, Color color);
+	OBB(Vec midPoint, float halfU, float halfV, float halfW, Color color);
 
 	// Inherited via Shape
 	virtual void test(Ray & ray, HitData & hit) override;

@@ -1,5 +1,5 @@
 #include "MyShapes.h"
-#define EPS 0.0000000001
+#define EPS 0.0001
 
 Plane::Plane(Vec normal, float distance, Color color)
 {
@@ -156,123 +156,77 @@ Vec Triangle::normal(Vec & point)
 
 OBB::OBB(Vec midPoint, Vec normU, Vec normV, Vec normW, float halfU, float halfV, float halfW, Color color)
 {
+	this->c = color;
 	this->m = midPoint;
 
-	this->uN = normU;
-	this->vN = normV;
-	this->wN = normW;
+	this->normals[0] = normU;
+	this->normals[1] = normV;
+	this->normals[2] = normW;
 
-	this->uH = halfU;
-	this->vH = halfV;
-	this->wH = halfW;
+	this->halfWidths[0] = halfU;
+	this->halfWidths[1] = halfV;
+	this->halfWidths[2] = halfW;
 
-	this->uO = uN * uH;
-	this->vO = vN * vH;
-	this->wO = wN * wH;
+	this->centers[0] = m + normals[0] * halfWidths[0];
+	this->centers[1] = m - normals[0] * halfWidths[0];
+	this->centers[2] = m + normals[1] * halfWidths[1];
+	this->centers[3] = m - normals[1] * halfWidths[1]; 
+	this->centers[4] = m + normals[2] * halfWidths[2];
+	this->centers[5] = m - normals[2] * halfWidths[2];
 
-	this->c = color;
 }
+
+OBB::OBB(Vec midPoint, float halfU, float halfV, float halfW, Color color)
+	:OBB(midPoint, { 1,0,0 }, { 0,1,0 }, { 0,0,1 }, halfU, halfV, halfW, color)
+{}
 
 void OBB::test(Ray & r, HitData & hit)
 {
 	float tMin = -INFINITY;
 	float tMax = INFINITY;
-	float t1, t2, k1, k2;
-	Vec p1, p2;
-
-	float uNDd = uN.Dot(r.d);
-	if (uNDd != 0)
+	Vec p = m - r.o;
+	
+	float e, f, t1, t2;
+	for (int i = 0; i <3; i++)
 	{
-		float uNDo = uN.Dot(r.o);
-		t1 = (uN.Dot(m + uO) - uNDo) / uNDd;
-		t2 = (uN.Dot(m - uO) - uNDo) / uNDd;
-		if (t1 > t2) std::swap(t1, t2);
-		if (t1 > tMin) tMin = t1;
-		if (t2 < tMax) tMax = t2;
-		if (tMin > tMax) return;
-		if (tMax < 0) return;
-	}
-	else
-	{
-		p1 = m + uO;
-		p2 = m - uO;
-		k1 = -uN.Dot(p1);
-		k2 = -uN.Dot(p2);
-		k1 += uN.Dot(p1 + r.d);
-		k2 += uN.Dot(p2 + r.d);
-
-		if (k1 != 0 && k2 != 0) return;
-	}
-
-	float vNDd = vN.Dot(r.d);
-	if (vNDd != 0)
-	{
-		float vNDo = vN.Dot(r.o);
-		t1 = (vN.Dot(m + vO) - vNDo) / vNDd;
-		t2 = (vN.Dot(m - vO) - vNDo) / vNDd;
-		if (t1 > t2) std::swap(t1, t2);
-		if (t1 > tMin) tMin = t1;
-		if (t2 < tMax) tMax = t2;
-		if (tMin > tMax) return;
-		if (tMax < 0) return;
-	}
-	else
-	{
-		p1 = m + vO;
-		p2 = m - vO;
-		k1 = -vN.Dot(p1);
-		k2 = -vN.Dot(p2);
-		k1 += vN.Dot(p1 + r.d);
-		k2 += vN.Dot(p2 + r.d);
-
-		if (k1 != 0 && k2 != 0) return;
-	}
-
-	float wNDd = wN.Dot(r.d);
-	if (wNDd != 0)
-	{
-		float wNDo = wN.Dot(r.o);
-		t1 = (wN.Dot(m + wO) - wNDo) / wNDd;
-		t2 = (wN.Dot(m - wO) - wNDo) / wNDd;
-		if (t1 > t2) std::swap(t1, t2);
-		if (t1 > tMin) tMin = t1;
-		if (t2 < tMax) tMax = t2;
-		if (tMin > tMax) return;
-		if (tMax < 0) return;
-	}
-	else
-	{
-		p1 = m + wO;
-		p2 = m - wO;
-		k1 = -wN.Dot(p1);
-		k2 = -wN.Dot(p2);
-		k1 += wN.Dot(p1 + r.d);
-		k2 += wN.Dot(p2 + r.d);
-
-		if (k1 != 0 && k2 != 0) return;
-	}
-
-	if (tMin <= tMax)
-	{
-		if (tMin > 0 && (hit.t > tMin || hit.t < 0))
+		e = normals[i].Dot(p);
+		f = normals[i].Dot(r.d);
+		if (abs(f) > EPS)
 		{
-			hit.t = tMin;
-			hit.color = c;
-			hit.lastShape = this;
-			hit.lastNormal = Vec();
+			t1 = (e + halfWidths[i]) / f;
+			t2 = (e - halfWidths[i]) / f;
+			if (t1 > t2) std::swap(t1, t2);
+			if (t1 > tMin) tMin = t1;
+			if (t2 < tMax) tMax = t2;
+			if (tMin > tMax) return;
+			if (tMax < 0) return;
 		}
-	}	
+		else if ((-e - halfWidths[i]) > 0 || (-e + halfWidths[i]) < 0) return;
+	}
+	
+	float t = tMin > 0 ? tMin : tMax;
+	if (t > 0 && (hit.t > t || hit.t < 0))
+	{
+		hit.t = t;
+		hit.color = c;
+		hit.lastShape = this;
+		hit.lastNormal = normal(r(t));
+	}
 }
 
 Vec OBB::normal(Vec & point)
 {
-	Vec op = point - m;
-	op.Normalize();
+	Vec n = { 0,0,0 };
 
-	float big;
-	Vec norm;
+	for (int i = 0, ni; i < 6; i++)
+	{
+		ni = i / 2;
+		if (abs(normals[ni].Dot(point - centers[i])) < EPS)
+		{
+			n = normals[ni];
+			if (i % 2 == 1)	n = n * -1;
+		}
+	}
 
-
-
-	return norm;
+	return n;
 }
