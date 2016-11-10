@@ -72,6 +72,7 @@ class Plane : public Shape
 private:
 	Vec n;
 	Vec p;
+	float nDp;
 	float d;
 	float k;
 

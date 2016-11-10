@@ -1,40 +1,38 @@
 #include "MyShapes.h"
 #define EPS 0.0001
-#define ZERO(f) (abs(f) < EPS)
+#define IS_ZERO(f) (abs(f) < EPS)
+#define NOT_ZERO(f) (abs(f) > EPS)
 
 Plane::Plane(Vec normal, float distance, Color color)
 {
-	this->n/*ormal*/ = normal;
-	this->p/*oint*/ = normal * distance;
-	this->k/*onstant*/ = -n.Dot(p);
+	this->n = normal;
+	this->p = normal * distance;
+	this->nDp = n.Dot(p);
+	this->k = -n.Dot(p);
 
-	this->d/*istance*/ = distance;
-	this->c/*olor*/ = color;
+	this->d = distance;
+	this->c = color;
 
-	// n.x + n.y + n.z + k = 0;
+	// n.Dot(p) + k = 0;
 }
 
 void Plane::test(Ray & r, HitData & hit)
 {
-	float dot = n.Dot(r.d);
+	float nDd = n.Dot(r.d);
 
-	if (dot != 0)
+	if (NOT_ZERO(nDd))
 	{
 		/*
-			 | x = r.o.x + r.d.x * t
-		ray: | y = r.o.y + r.d.y * t
-			 | z = r.o.z + r.d.z * t
 
-		plane: n.x + n.y + n.z + k = 0
+		n*(p - (o + td)) = 0
+		n*p - n*(o + td) = 0
+		n*p = n*(o + td)
+		n*p = n*o + tn*d
+		t = (nDp - n*o) / n*d
 
-		n.x * (r.o.x + r.d.x * t) + n.y * (r.o.y + r.d.y * t) + n.z * (r.o.z + r.d.z * t) + k = 0
-		t * (n.x * r.d.x + n.y * r.d.y + n.z * r.d.z) + (n.x * r.o.x +  n.y * r.o.y + n.z * r.o.z) + k = 0
-		t * n.Dot(r.d) + n.Dot(r.o) + k = 0
-		t * n.Dot(r.d) = -(n.Dot(r.o) + k)
-		t = -(n.Dot(r.o) + k) / n.Dot(r.d)
 		*/
 
-		float t = -(n.Dot(r.o) + k) / dot;
+		float t = -(n.Dot(r.o) + k) / nDd;
 
 		if (t > 0 && (hit.t > t || hit.t < 0))
 		{
@@ -76,33 +74,35 @@ void Sphere::test(Ray & r, HitData & hit)
 		t = -a +- sqr(a2 - b)
 	*/
 	Vec po = r.o - p;
-	float a = r.d.Dot(po);
-	float b = po.Dot(po) - r2;
-	float c = a * a - b;
-
-	if (c >= 0)
+	if (po.Length2 >= r2)
 	{
-		float sqrc = sqrt(c);
-		float t1 = -a + sqrc;
-		float t2 = -a - sqrc;
+		float a = r.d.Dot(po);
+		float b = po.Dot(po) - r2;
+		float c = a * a - b;
 
-		if (t1 > t2) std::swap(t1, t2);
-
-
-		if (t1 > 0 && (t1 < hit.t || hit.t < 0))
+		if (c >= 0)
 		{
-			hit.t = t1;
-			hit.color = this->c;
-			hit.lastNormal = normal(r(t1));
-			hit.lastShape = this;
+			float sqrc = sqrt(c);
+			float t1 = -a + sqrc;
+			float t2 = -a - sqrc;
+
+			if (t1 > t2) std::swap(t1, t2);
+
+			if (t1 > 0 && (t1 < hit.t || hit.t < 0))
+			{
+				hit.t = t1;
+				hit.color = this->c;
+				hit.lastNormal = normal(r(t1));
+				hit.lastShape = this;
+			}
+			/*else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
+			{
+				hit.t = t2;
+				hit.color = this->c;
+				hit.lastNormal = normal(r(t2));
+				hit.lastShape = this;
+			}*/
 		}
-		/*else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
-		{
-			hit.t = t2;
-			hit.color = this->c;
-			hit.lastNormal = normal(r(t2));
-			hit.lastShape = this;
-		}*/
 	}
 }
 
@@ -128,7 +128,7 @@ Triangle::Triangle(Vec p0, Vec p1, Vec p2, Color color)
 void Triangle::test(Ray & ray, HitData & hit)
 {
 	float ndotd = n.Dot(ray.d);
-	if (ndotd != 0)
+	if (NOT_ZERO(ndotd))
 	{
 		Mat M = { ray.d * -1, e0, e1 };
 		Vec p = ray.o - p0;
@@ -192,7 +192,7 @@ void OBB::test(Ray & r, HitData & hit)
 	{
 		e = normals[i].Dot(p);
 		f = normals[i].Dot(r.d);
-		if (abs(f) > EPS)
+		if (NOT_ZERO(f))
 		{
 			t1 = (e + halfWidths[i]) / f;
 			t2 = (e - halfWidths[i]) / f;
@@ -222,12 +222,12 @@ Vec OBB::normal(Vec & point)
 	for (int i = 0, i2; i < 3; i++)
 	{
 		i2 = i * 2;
-		if (ZERO(normals[i].Dot(point - centers[i2])))
+		if (IS_ZERO(normals[i].Dot(point - centers[i2])))
 		{
 			n = normals[i];
 			break;
 		}
-		else if (ZERO(normals[i].Dot(point - centers[i2 + 1])))
+		else if (IS_ZERO(normals[i].Dot(point - centers[i2 + 1])))
 		{
 			n = normals[i] * -1;
 			break;
