@@ -6,14 +6,8 @@
 Plane::Plane(Vec normal, float distance, Color color)
 {
 	this->n = normal;
-	this->p = normal * distance;
-	this->nDp = n.Dot(p);
-	this->k = -n.Dot(p);
-
-	this->d = distance;
+	this->nDp = n.Dot(normal * distance);
 	this->c = color;
-
-	// n.Dot(p) + k = 0;
 }
 
 void Plane::test(Ray & r, HitData & hit)
@@ -23,16 +17,14 @@ void Plane::test(Ray & r, HitData & hit)
 	if (NOT_ZERO(nDd))
 	{
 		/*
-
 		n*(p - (o + td)) = 0
 		n*p - n*(o + td) = 0
 		n*p = n*(o + td)
 		n*p = n*o + tn*d
-		t = (nDp - n*o) / n*d
-
+		t = (nDp - n*o) / nDd
 		*/
 
-		float t = -(n.Dot(r.o) + k) / nDd;
+		float t = (nDp - n.Dot(r.o)) / nDd;
 
 		if (t > 0 && (hit.t > t || hit.t < 0))
 		{
@@ -53,7 +45,6 @@ Sphere::Sphere(Vec center, float radius, Color color)
 {
 	this->c = color;
 	this->p = center;
-	this->r = radius;
 	this->r2 = radius * radius;
 }
 
@@ -69,39 +60,29 @@ void Sphere::test(Ray & r, HitData & hit)
 		f(ray) = t2 + 2t(d * (o - p)) + (o - p) * (o - p) - r2 = 0
 		a = (d * (o - p))
 		b = (o - p) * (o - p) - r2
-
 		t2 + 2ta + b = 0
 		t = -a +- sqr(a2 - b)
+		c = sqr(a2 - b)
 	*/
 	Vec po = r.o - p;
-	if (po.Length2 >= r2)
+	if (po.Length2() >= r2)
 	{
 		float a = r.d.Dot(po);
 		float b = po.Dot(po) - r2;
 		float c = a * a - b;
-
 		if (c >= 0)
 		{
 			float sqrc = sqrt(c);
 			float t1 = -a + sqrc;
 			float t2 = -a - sqrc;
-
 			if (t1 > t2) std::swap(t1, t2);
-
 			if (t1 > 0 && (t1 < hit.t || hit.t < 0))
 			{
 				hit.t = t1;
 				hit.color = this->c;
+				hit.lastShape = this;
 				hit.lastNormal = normal(r(t1));
-				hit.lastShape = this;
 			}
-			/*else if (t2 > 0 && (t2 < hit.t || hit.t < 0))
-			{
-				hit.t = t2;
-				hit.color = this->c;
-				hit.lastNormal = normal(r(t2));
-				hit.lastShape = this;
-			}*/
 		}
 	}
 }
